@@ -106,11 +106,18 @@ def getSMIRKSMatches_RDKMol(rdkmol, smirks, aromaticity_model = None):
     """
 
     # Make a copy of molecule so we don't influence original (probably safer than deepcopy per C Bayly)
+    #Chem.SetAromaticity(rdkmol, Chem.AromaticityModel.AROMATICITY_MDL)
     mol = Chem.Mol(rdkmol)
+    Chem.SanitizeMol(mol, Chem.SANITIZE_ALL^Chem.SANITIZE_SETAROMATICITY)
+    Chem.SetAromaticity(mol, Chem.AromaticityModel.AROMATICITY_MDL)
+
     # mol = Chem.AddHs(mol)
 
     # Set up query.
     qmol = Chem.MolFromSmarts(smirks)   #cannot catch the error
+    #print("Changed qmol aromaticity")
+    #Chem.SetAromaticity(qmol, Chem.AromaticityModel.AROMATICITY_MDL)
+
     ind_map = {}
     for atom in qmol.GetAtoms():
         map_num = atom.GetAtomMapNum()
@@ -970,6 +977,11 @@ class ForceField(object):
 
         # Make a deep copy of the input molecules so they are not modified by charging
         molecules = copy.deepcopy(molecules)
+        """
+        for m in molecules:
+            print("changing aromaticity")
+            Chem.SetAromaticity(m, Chem.AromaticityModel.AROMATICITY_MDL)
+        """
         # molecules = molecules.__deepcopy__() #changed (sw)
 
         ###############################################################################################33
