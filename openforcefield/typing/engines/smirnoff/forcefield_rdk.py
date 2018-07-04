@@ -994,7 +994,8 @@ class ForceField(object):
         for molecule in molecules:
             charges = [float(atom.GetPropsAsDict()["_TriposPartialCharge"]) if "_TriposPartialCharge" in atom.GetPropsAsDict() else 0.0 for atom in molecule.GetAtoms()]
             for idx, atom in enumerate(molecule.GetAtoms()):
-                atom.SetDoubleProp("PartialCharge", charges[idx])
+                if "PartialCharge" not in atom.GetPropsAsDict():
+                    atom.SetDoubleProp("PartialCharge", charges[idx])
 
 
 
@@ -2065,7 +2066,7 @@ class NonbondedGenerator(object):
             charge_by_atom = {}
             for atom in reference_molecule.GetAtoms():
                 # charge_by_atom[atom.GetIdx()] = atom.GetPartialCharge()
-                charge_by_atom[atom.GetIdx()] = atom.GetPropsAsDict()["PartialCharge"]
+                charge_by_atom[atom.GetIdx()] = float(atom.GetPropsAsDict()["PartialCharge"])
 
             # Loop over mappings and copy NB parameters from reference molecule
             # to other instances of the molecule
