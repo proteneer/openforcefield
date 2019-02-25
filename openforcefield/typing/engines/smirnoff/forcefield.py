@@ -25,6 +25,7 @@ http://stackoverflow.com/questions/6949395/is-there-a-way-to-get-a-line-number-f
 #=============================================================================================
 # GLOBAL IMPORTS
 #=============================================================================================
+from collections import OrderedDict
 import ast
 import operator as op
 import collections
@@ -1067,7 +1068,7 @@ To do: Update behavior of "Implied" force_type so it raises an exception if the 
 
         # Loop over molecules and label
         for idx,mol in enumerate(oemols):
-            molecule_labels.append({})
+            molecule_labels.append(OrderedDict())
             for force in self._forces:
                 # Initialize dictionary storage for this force type
                 forcelabel = force.__class__.__name__
@@ -1141,6 +1142,7 @@ def _extractQuantity(node, parent, name, unit_name=None):
        If specified, use this attribute name of 'parent' to look up units
 
     """
+    # print(node, parent, name, unit_name)
     # Check for expected attributes
     if name not in node.attrib:
         if 'sourceline' in node.attrib:
@@ -2024,6 +2026,8 @@ class NonbondedGenerator(object):
             force.addParticle(0.0, 1.0, 0.0)
         # Set the particle Lennard-Jones terms.
         for (atom_indices, ljtype) in atoms.items():
+            print("SETTING LJ", ljtype.sigma, ljtype.epsilon)
+            # assert 0
             force.setParticleParameters(atom_indices[0], 0.0, ljtype.sigma, ljtype.epsilon)
 
         # Check that no topological torsions are missing force parameters
@@ -2060,6 +2064,7 @@ class NonbondedGenerator(object):
         for (atom1, atom2) in topology.bonds():
             if (atom1.index < 0) or (atom2.index < 0) or (atom1.index >= natoms) or (atom2.index >= natoms):
                 raise Exception('atom indices out of bounds')
+            print("ADDING BONDED EXCEPTIONS")
             bondIndices.append((atom1.index, atom2.index))
 
         # Create the exceptions.
