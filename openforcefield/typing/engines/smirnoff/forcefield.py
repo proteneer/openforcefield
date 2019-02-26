@@ -851,31 +851,32 @@ To do: Update behavior of "Implied" force_type so it raises an exception if the 
         # Expand conformers
         if not openeye.oechem.OEChemIsLicensed(): raise(ImportError("Need License for OEChem!"))
         if not openeye.oeomega.OEOmegaIsLicensed(): raise(ImportError("Need License for OEOmega!"))
-        omega = openeye.oeomega.OEOmega()
-        omega.SetMaxConfs(800)
-        omega.SetCanonOrder(False)
-        omega.SetSampleHydrogens(True)
-        omega.SetEnergyWindow(15.0)
-        omega.SetRMSThreshold(1.0)
-        omega.SetStrictStereo(True) #Don't generate random stereoisomer if not specified
-        charged_copy = openeye.oechem.OEMol(molecule)
-        status = omega(charged_copy)
-        if not status:
-            raise(RuntimeError("Omega returned error code %s" % status))
+        # omega = openeye.oeomega.OEOmega()
+        # omega.SetMaxConfs(800)
+        # omega.SetCanonOrder(False)
+        # omega.SetSampleHydrogens(True)
+        # omega.SetEnergyWindow(15.0)
+        # omega.SetRMSThreshold(1.0)
+        # omega.SetStrictStereo(True) #Don't generate random stereoisomer if not specified
+        # charged_copy = openeye.oechem.OEMol(molecule)
+        # status = omega(charged_copy)
+
+        # if not status:
+            # raise(RuntimeError("Omega returned error code %s" % status))
 
         # Assign charges
-        status = openeye.oequacpac.OEAssignPartialCharges(charged_copy, getattr(oequacpac, oechargemethod), False, False)
+        status = openeye.oequacpac.OEAssignPartialCharges(molecule, getattr(oequacpac, oechargemethod), False, True)
         if not status:
             raise(RuntimeError("OEAssignPartialCharges returned error code %s" % status))
         # Our copy has the charges we want but not the right conformation. Copy charges over. Also copy over Wiberg bond orders if present
         partial_charges = []
         partial_bondorders = []
         if modifycharges:
-            for atom in charged_copy.GetAtoms():
+            for atom in molecule.GetAtoms():
                 partial_charges.append( atom.GetPartialCharge() )
             for (idx,atom) in enumerate(molecule.GetAtoms()):
                 atom.SetPartialCharge( partial_charges[idx] )
-        for bond in charged_copy.GetBonds():
+        for bond in molecule.GetBonds():
             partial_bondorders.append( bond.GetData("WibergBondOrder"))
         for (idx, bond) in enumerate(molecule.GetBonds()):
             bond.SetData("WibergBondOrder", partial_bondorders[idx])
@@ -1962,6 +1963,8 @@ class NonbondedGenerator(object):
             except:
                 rmin_half = _extractQuantity(node, parent, 'rmin_half', unit_name='sigma_unit')
                 self.sigma = 2.*rmin_half/(2.**(1./6.))
+
+            self.charge = _extractQuantity(node, parent, 'charge')
             self.epsilon = _extractQuantity(node, parent, 'epsilon')
 
     def __init__(self, forcefield, coulomb14scale, lj14scale):
