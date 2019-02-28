@@ -2053,6 +2053,7 @@ class NonbondedGenerator(object):
                     # Look up the charge on the atom in the reference molecule
                     charge = charge_by_atom[atom_index]*unit.elementary_charge
 
+
                     # Set parameters for equivalent atom in other instance of
                     # this molecule
                     force.setParticleParameters(map_atom_index, charge, sigma, epsilon)
